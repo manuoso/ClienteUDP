@@ -47,7 +47,8 @@ int main(int argc, char* argv[]) {
 
 			datos data_recv;
 			memcpy(&data_recv, &recv_buf[0], sizeof(datos));
-
+			
+			std::cout << "Lenght received: " << len << std::endl;
 			std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << std::endl;
 		}
 	}
