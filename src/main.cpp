@@ -11,12 +11,21 @@
 #include <boost/asio.hpp>
 #include "LogManager.h"
 
-struct datos{
+struct data_m{
         float x;
         float y;
         float z;
-	uint64_t timestamp;
-};
+	      uint64_t timestamp;
+    };
+
+    struct data_ma{
+        float x;
+        float y;
+        float z;
+	      uint64_t timestamp;
+        float hz;
+        float v;
+    };
 
 using boost::asio::ip::udp;
 
@@ -35,6 +44,12 @@ int main(int argc, char* argv[]) {
 		int portServerUDP;
 		std::cin >> portServerUDP;
 
+		std::cout << "You want to receive measure only?" << std::endl;
+		std::cout << "-1 measure only" << std::endl;
+		std::cout << "-2 measure with angles" << std::endl;
+		int measureMode;		
+		std::cin >> measureMode; 
+
 		boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address::from_string(ipServerUDP), portServerUDP);
 
 		udp::socket socket(io_service);
@@ -46,20 +61,40 @@ int main(int argc, char* argv[]) {
 		
 		LogManager::get()->status("Started to receive data", true);
 
-		while(true){
-			boost::array<char, sizeof(datos)> recv_buf;
-			udp::endpoint sender_endpoint;
-			size_t len = socket.receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+		if(measureMode == 1){
+			while(true){
+				boost::array<char, sizeof(data_m)> recv_buf;
+				udp::endpoint sender_endpoint;
+				size_t len = socket.receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
 
-			datos data_recv;
-			memcpy(&data_recv, &recv_buf[0], sizeof(datos));
-			
-			std::cout << "length received: " << len << std::endl;
-			std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << std::endl;
+				data_m data_recv;
+				memcpy(&data_recv, &recv_buf[0], sizeof(data_m));
+		
+				std::cout << "length received: " << len << std::endl;
+				std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << std::endl;
 
-			LogManager::get()->message(std::to_string(len), "LENGTH", false);
-			LogManager::get()->message(std::to_string(data_recv.x) + "," + std::to_string(data_recv.y) + "," + std::to_string(data_recv.z) + "," + std::to_string(data_recv.timestamp), "RECEIVED", false);
+				LogManager::get()->message(std::to_string(len), "LENGTH", false);
+				LogManager::get()->message(std::to_string(data_recv.x) + "," + std::to_string(data_recv.y) + "," + std::to_string(data_recv.z) + "," + std::to_string(data_recv.timestamp), "RECEIVED", false);
+			}
+		}else if(measureMode == 2){
+			while(true){
+				boost::array<char, sizeof(data_ma)> recv_buf;
+				udp::endpoint sender_endpoint;
+				size_t len = socket.receive_from(boost::asio::buffer(recv_buf), sender_endpoint);
+
+				data_ma data_recv;
+				memcpy(&data_recv, &recv_buf[0], sizeof(data_ma));
+		
+				std::cout << "length received: " << len << std::endl;
+				std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << "HZ: " << data_recv.hz << "V: " << data_recv.v  << std::endl;
+
+				LogManager::get()->message(std::to_string(len), "LENGTH", false);
+				LogManager::get()->message(std::to_string(data_recv.x) + "," + std::to_string(data_recv.y) + "," + std::to_string(data_recv.z) + "," + std::to_string(data_recv.timestamp) + "," + std::to_string(data_recv.hz) + "," + std::to_string(data_recv.v), "RECEIVED", false);
+			}
+		}else{
+			LogManager::get()->error("Unrecognized measure mode", true);
 		}
+			
 	}
 	catch (std::exception& e)
 	{
