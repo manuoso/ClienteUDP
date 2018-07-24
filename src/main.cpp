@@ -25,6 +25,7 @@ struct data_m{
 	      uint64_t timestamp;
         float hz;
         float v;
+	float slopeDist;
     };
 
 using boost::asio::ip::udp;
@@ -74,7 +75,7 @@ int main(int argc, char* argv[]) {
 				std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << std::endl;
 
 				LogManager::get()->message(std::to_string(len), "LENGTH", false);
-				LogManager::get()->message(std::to_string(data_recv.x) + "," + std::to_string(data_recv.y) + "," + std::to_string(data_recv.z) + "," + std::to_string(data_recv.timestamp), "RECEIVED", false);
+				LogManager::get()->message(std::to_string(data_recv.x) + "|" + std::to_string(data_recv.y) + "|" + std::to_string(data_recv.z) + "|" + std::to_string(data_recv.timestamp), "RECEIVED", false);
 			}
 		}else if(measureMode == 2){
 			while(true){
@@ -86,10 +87,10 @@ int main(int argc, char* argv[]) {
 				memcpy(&data_recv, &recv_buf[0], sizeof(data_ma));
 		
 				std::cout << "length received: " << len << std::endl;
-				std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << "HZ: " << data_recv.hz << "V: " << data_recv.v  << std::endl;
+				std::cout << "x: " << data_recv.x << ", y: " << data_recv.y << ", z: " << data_recv.z << ", timestamp: " << data_recv.timestamp << ", HZ: " << data_recv.hz << ", V: " << data_recv.v << ", SlopeDist: " << data_recv.slopeDist << std::endl;
 
 				LogManager::get()->message(std::to_string(len), "LENGTH", false);
-				LogManager::get()->message(std::to_string(data_recv.x) + "," + std::to_string(data_recv.y) + "," + std::to_string(data_recv.z) + "," + std::to_string(data_recv.timestamp) + "," + std::to_string(data_recv.hz) + "," + std::to_string(data_recv.v), "RECEIVED", false);
+				LogManager::get()->message(std::to_string(data_recv.x) + "|" + std::to_string(data_recv.y) + "|" + std::to_string(data_recv.z) + "|" + std::to_string(data_recv.timestamp) + "|" + std::to_string(data_recv.hz) + "|" + std::to_string(data_recv.v) + "|" + std::to_string(data_recv.slopeDist), "RECEIVED", false);
 			}
 		}else{
 			LogManager::get()->error("Unrecognized measure mode", true);
